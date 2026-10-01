@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Tier List Maker</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);--bg:#f4f5f8;--card:#fff;--tx:#1b1d26;--mu:#6b7080;--bd:#dfe2ea;--ac:#6c5ce7}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#12131a;--card:#1c1e29;--tx:#eceef5;--mu:#9096a8;--bd:#2c2f3e;--ac:#8b7dff}}
+:root[data-theme="dark"]{--bg:#12131a;--card:#1c1e29;--tx:#eceef5;--mu:#9096a8;--bd:#2c2f3e;--ac:#8b7dff}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font-family:system-ui,-apple-system,Segoe UI,sans-serif}
+main{max-width:980px;margin:0 auto;padding:16px}
+h1{margin:8px 0 14px;font-size:1.5rem}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.tabs button{padding:9px 16px;border:1px solid var(--bd);background:var(--card);color:var(--tx);border-radius:20px;cursor:pointer;font-size:.95rem}
+.tabs button.on{background:var(--ac);color:#fff;border-color:var(--ac)}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:16px;margin-bottom:16px}
+.card h2{margin:0 0 10px;font-size:1.1rem}
+input[type=text]{width:100%;padding:10px;border:1px solid var(--bd);border-radius:8px;background:var(--bg);color:var(--tx);font-size:1rem}
+.crit{display:grid;grid-template-columns:130px 1fr 28px;gap:10px;align-items:center;margin:8px 0;font-size:.92rem}
+.crit input{width:100%;accent-color:var(--ac)}
+.crit b{text-align:right}
+.res{display:flex;align-items:center;gap:12px;margin:12px 0;flex-wrap:wrap}
+.big{font-size:1.8rem;font-weight:800}
+.badge{display:inline-flex;align-items:center;justify-content:center;width:42px;height:42px;border-radius:8px;color:#111;font-weight:800;font-size:1.3rem}
+.btn{padding:10px 16px;border:0;border-radius:8px;background:var(--ac);color:#fff;cursor:pointer;font-size:.95rem}
+.btn.g{background:var(--bd);color:var(--tx)}
+.tier{display:flex;border:1px solid var(--bd);border-radius:10px;overflow:hidden;margin-bottom:8px;background:var(--card);min-height:70px}
+.tl{width:70px;flex:none;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#111;font-weight:800;font-size:1.8rem}
+.tl small{font-size:.65rem;font-weight:600}
+.items{display:flex;flex-wrap:wrap;gap:8px;padding:8px;align-items:flex-start;flex:1}
+.it{background:var(--bg);border:1px solid var(--bd);border-radius:8px;padding:6px 10px;font-size:.88rem;cursor:pointer}
+.it span{color:var(--mu);margin-left:6px;font-weight:700}
+.imgrow{display:flex;align-items:center;gap:12px;margin:12px 0;flex-wrap:wrap}
+.pv{width:72px;height:96px;border-radius:8px;border:1px dashed var(--bd);background:var(--bg) center/cover no-repeat;display:flex;align-items:center;justify-content:center;color:var(--mu);font-size:.7rem;text-align:center}
+.it.im{padding:0;width:96px;overflow:hidden;position:relative}
+.it.im .ph{width:100%;height:128px;background:center/cover no-repeat}
+.it.im .cap{padding:4px 6px;font-size:.75rem;line-height:1.2;word-break:break-word}
+.it.im .sc{position:absolute;top:4px;right:4px;background:rgba(0,0,0,.75);color:#fff;border-radius:6px;padding:1px 6px;font-size:.75rem;font-weight:700;margin:0}
+#radar{text-align:center}
+.sg{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
+.sg div{background:var(--bg);border-radius:8px;padding:10px;display:flex;flex-direction:column}
+.sg b{font-size:1.5rem}.sg span{font-size:.75rem;color:var(--mu);word-break:break-word}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:center}
+.two h3{margin:0 0 8px;font-size:.95rem}
+.bar{display:flex;align-items:center;gap:8px;margin:5px 0}
+.bar b{width:26px;height:22px;border-radius:5px;color:#111;display:flex;align-items:center;justify-content:center;font-size:.85rem}
+.bar i{height:14px;border-radius:4px;display:block}.bar em{font-size:.8rem;color:var(--mu);font-style:normal}
+@media(max-width:620px){.sg{grid-template-columns:repeat(2,1fr)}.two{grid-template-columns:1fr}}
+.todos .it{cursor:default}
+#sim h3{margin:14px 0 4px;font-size:.95rem}
+.sim{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.sc2{display:flex;gap:8px;align-items:center;background:var(--bg);border:1px solid var(--bd);border-radius:8px;padding:6px 10px;cursor:pointer;font-size:.85rem;max-width:100%}
+.sc2 .th{width:34px;height:46px;flex:none;border-radius:5px;background:center/cover;display:flex;align-items:center;justify-content:center;font-weight:800;color:#111}
+.sc2 small{display:block;color:var(--mu)}
+.hr{display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid var(--bd)}
+.hr .md{width:30px;text-align:center;font-weight:800;font-size:1.2rem;flex:none}
+.hr .th{width:42px;height:56px;border-radius:6px;background:center/cover;flex:none;display:flex;align-items:center;justify-content:center;font-weight:800;color:#111}
+.hr .nm{flex:1;min-width:0;word-break:break-word}
+.hr small{display:block;color:var(--mu)}
+.hr .pt{font-size:1.3rem;font-weight:800}
+.vs{display:flex;gap:12px;justify-content:center;margin:8px 0 14px}
+.duelc{flex:1;max-width:240px;background:var(--bg);border:2px solid var(--bd);border-radius:12px;padding:12px;text-align:center;cursor:pointer;word-break:break-word}
+.duelc:hover{border-color:var(--ac)}
+.duelc .th{width:100%;height:190px;border-radius:8px;background:center/cover;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:3rem;color:#111;margin-bottom:8px}
+.duelc small{display:block;color:var(--mu)}
+.vsb{align-self:center;font-weight:800;color:var(--mu)}
+.empty{color:var(--mu);font-size:.85rem;padding:8px}
+.note{color:var(--mu);font-size:.8rem;margin-top:8px}
+@media(max-width:520px){.duelc .th{height:130px}.crit{grid-template-columns:100px 1fr 24px}.tl{width:56px}}
+</style>
+</head>
+<body>
+<main>
+<h1>🏆 Tier List Maker</h1>
+<div class="tabs" id="tabs"></div>
+<div class="card" id="formcard">
+  <h2 id="ft">Novo item</h2>
+  <input type="text" id="name" placeholder="Nome">
+  <div class="imgrow"><div class="pv" id="pv">sem imagem</div>
+    <div><input type="file" id="file" accept="image/*" hidden>
+    <button class="btn g" id="pick" type="button">Escolher imagem</button>
+    <button class="btn g" id="rmimg" type="button" hidden>Remover</button>
+    <div class="note">Também dá para colar uma imagem (Ctrl+V).</div></div></div>
+  <div id="crits"></div>
+  <div class="res"><div class="badge" id="rb">-</div><div class="big"><span id="rs">0</span>/100</div>
+    <button class="btn" id="save">Adicionar</button><button class="btn g" id="clr">Limpar</button></div>
+  <div id="radar"></div>
+  <div id="sim"></div>
+  <div class="note">Cada critério vai de 1 a 10. Critérios com ×N têm peso diferente. A nota final (0–100) é a média ponderada convertida: todos 1 = 0, todos 10 = 100.</div>
+</div>
+<div id="board"></div>
+<div class="card" id="stats"></div>
+<div class="note">Clique em um item para editar ou remover. Tiers: S ≥90 · A ≥75 · B ≥60 · C ≥45 · D ≥30 · E &lt;30.</div>
+</main>
+<script>
+const T=[["S",90,"#ff6b6b"],["A",75,"#ffa94d"],["B",60,"#ffd43b"],["C",45,"#a9e34b"],["D",30,"#4dabf7"],["E",0,"#b197fc"]];
+const TH={
+ filmes:{n:"🎬 Filmes, séries e animes",c:["Roteiro","Direção","Atuação","Fotografia ou animação","Trilha sonora","Originalidade","Emoção","Rewatch","Design de personagens"],w:[3,.5,.5,1,1,1,1,1,1]},
+ jogos:{n:"🎮 Jogos",c:["Gameplay","História","Gráficos","Trilha sonora","Level design","Rejogabilidade","Otimização","Imersão"]},
+ personagens:{n:"🧙 Personagens",c:["Carisma","Desenvolvimento","Design visual","Motivação","Impacto na trama","Originalidade","Relações","Marcante"]},
+ livros:{n:"📖 Livros",c:["Enredo","Personagens","Escrita e estilo","Ritmo","Originalidade","Ambientação","Final","Impacto emocional"]},
+ hqs:{n:"📚 HQs, mangás e webtoons",c:["Roteiro","Arte","Narrativa visual","Personagens","Originalidade","Ritmo","Final","Impacto cultural"]}
+};
+for(const k in TH)TH[k].w=TH[k].w||TH[k].c.map(()=>1);
+let cur="filmes",edit=null,data={filmes:[],jogos:[],personagens:[],hqs:[],livros:[]},vals=[],img=null;
+try{const s=localStorage.getItem("tierdata");if(s)data=Object.assign(data,JSON.parse(s))}catch(e){}
+const $=id=>document.getElementById(id);
+const save=()=>{try{localStorage.setItem("tierdata",JSON.stringify(data))}catch(e){}};
+const score=(v,k=cur)=>{let a=0,b=0;TH[k].w.forEach((w,i)=>{a+=w*((v[i]||1)-1);b+=w});return Math.round(a/(9*b)*100)};
+const esc=s=>String(s).replace(/</g,"&lt;");
+const tier=s=>T.find(t=>s>=t[1]);
+for(const k in TH)data[k]=(data[k]||[]).map(x=>{const v=TH[k].c.map((_,i)=>x.v[i]??5);return{...x,v,s:score(v,k)}});
+let DU={w:{},l:{},p:{}},dt="filmes",pair=null;
+try{const q=localStorage.getItem("tierduel");if(q)DU=Object.assign(DU,JSON.parse(q))}catch(e){}
+const dsave=()=>{try{localStorage.setItem("tierduel",JSON.stringify(DU))}catch(e){}};
+const net=x=>(DU.w[x.id]||0)-(DU.l[x.id]||0);
+const cmp=(a,b)=>b.s-a.s||net(b)-net(a);
+const pk=(a,b)=>[a,b].sort().join("-");
+function nextPair(){const L=data[dt];let best=null,bs=1e9;
+for(let i=0;i<L.length;i++)for(let j=i+1;j<L.length;j++){const a=L[i],b=L[j],sc=Math.abs(a.s-b.s)+(DU.p[pk(a.id,b.id)]||0)*4+Math.random()*3;if(sc<bs){bs=sc;best=[a.id,b.id]}}
+if(best&&Math.random()<.5)best.reverse();return best}
+function duel(){const b=$("board");$("formcard").hidden=true;$("stats").hidden=true;b.className="";const L=data[dt];
+let h=`<div class="card"><h2>⚔️ Duelo: qual é melhor?</h2><div class="tabs">${Object.keys(TH).map(k=>`<button class="${k==dt?"on":""}" data-k="${k}">${TH[k].n}</button>`).join("")}</div><div class="note" style="margin:0 0 8px">Itens com notas iguais ou próximas se enfrentam primeiro. Cada vitória ajuda a desempatar dentro do mesmo tier.</div>`;
+let it=null;
+if(L.length<2)h+='<div class="empty">Avalie pelo menos 2 itens neste tipo para duelar.</div>';
+else{if(!pair||!pair.every(id=>L.some(x=>x.id==id)))pair=nextPair();it=pair.map(id=>L.find(x=>x.id==id));
+const cd=(x,i)=>{const t=tier(x.s);return `<div class="duelc" data-i="${i}"><div class="th" style="background-color:${t[2]};${x.img?`background-image:url(${x.img})`:""}">${x.img?"":t[0]}</div><b>${esc(x.n)}</b><small>nota ${x.s} · tier ${t[0]}</small></div>`};
+h+=`<div class="vs">${cd(it[0],0)}<div class="vsb">VS</div>${cd(it[1],1)}</div><div style="text-align:center">${it[0].s==it[1].s?'<div class="note" style="margin:0 0 8px">🤝 Empate em nota! Sua escolha desempata.</div>':""}<button class="btn g" id="skip">Pular</button></div>`}
+h+="</div>";
+const R=L.filter(x=>(DU.w[x.id]||0)+(DU.l[x.id]||0)>0).sort((a,b)=>net(b)-net(a)||b.s-a.s).slice(0,10);
+h+=`<div class="card"><h2>Ranking de duelos</h2>${R.length?R.map((x,i)=>`<div class="hr"><div class="md">${i+1}º</div><div class="nm">${esc(x.n)}<small>nota ${x.s} · ${DU.w[x.id]||0} vitórias, ${DU.l[x.id]||0} derrotas</small></div><div class="pt">${net(x)>0?"+":""}${net(x)}</div></div>`).join(""):'<div class="empty">Nenhum duelo ainda.</div>'}</div>`;
+b.innerHTML=h;
+b.querySelectorAll(".tabs button").forEach(x=>x.onclick=()=>{dt=x.dataset.k;pair=null;duel()});
+if(it){b.querySelectorAll(".duelc").forEach(x=>x.onclick=()=>{const i=+x.dataset.i,w=it[i].id,l=it[1-i].id,k=pk(w,l);DU.w[w]=(DU.w[w]||0)+1;DU.l[l]=(DU.l[l]||0)+1;DU.p[k]=(DU.p[k]||0)+1;dsave();pair=null;duel()});
+$("skip").onclick=()=>{const k=pk(it[0].id,it[1].id);DU.p[k]=(DU.p[k]||0)+1;dsave();pair=null;duel()}}}
+function radar(L,V){const n=L.length,R=85,cx=210,cy=125,pt=(i,r)=>{const a=-Math.PI/2+2*Math.PI*i/n;return[cx+r*Math.cos(a),cy+r*Math.sin(a)]};let g="";
+[.25,.5,.75,1].forEach(f=>{g+=`<polygon points="${L.map((_,i)=>pt(i,R*f).join(",")).join(" ")}" fill="none" stroke="var(--bd)"/>`});
+L.forEach((l,i)=>{const[x,y]=pt(i,R),[tx,ty]=pt(i,R+12);g+=`<line x1="${cx}" y1="${cy}" x2="${x}" y2="${y}" stroke="var(--bd)"/><text x="${tx}" y="${ty}" font-size="10" fill="var(--mu)" text-anchor="${tx<cx-5?"end":tx>cx+5?"start":"middle"}" dominant-baseline="middle">${l}</text>`});
+g+=`<polygon points="${V.map((v,i)=>pt(i,R*v/10).join(",")).join(" ")}" fill="var(--ac)" fill-opacity=".3" stroke="var(--ac)" stroke-width="2"/>`;
+return `<svg viewBox="0 0 420 250" width="100%" style="max-width:420px">${g}</svg>`}
+function stats(){const all=cur=="todos",L=all?Object.keys(TH).flatMap(k=>data[k]):data[cur],c=all?[]:TH[cur].c,el=$("stats"),tot=Object.values(data).reduce((a,l)=>a+l.length,0);
+let h=`<h2>📊 Estatísticas — ${all?"Todos":TH[cur].n}</h2>`;
+if(!L.length){el.innerHTML=h+`<div class="empty">Adicione itens para ver as estatísticas. Total geral: ${tot}</div>`;return}
+const avg=Math.round(L.reduce((a,x)=>a+x.s,0)/L.length),sr=[...L].sort((a,b)=>b.s-a.s),cnt=T.map(t=>L.filter(x=>tier(x.s)[0]==t[0]).length),big=Math.max(...cnt)||1,lo=sr[sr.length-1];
+h+=`<div class="sg"><div><b>${L.length}</b><span>itens</span></div><div><b>${avg}</b><span>nota média</span></div><div><b>${sr[0].s}</b><span>maior: ${esc(sr[0].n)}</span></div><div><b>${lo.s}</b><span>menor: ${esc(lo.n)}</span></div></div>`;
+const bars=`<div><h3>Distribuição por tier</h3>${T.map((t,i)=>`<div class="bar"><b style="background:${t[2]}">${t[0]}</b><i style="width:${cnt[i]/big*70}%;background:${t[2]}"></i><em>${cnt[i]}</em></div>`).join("")}</div>`;
+if(all){h+=`<div class="two">${bars}<div><h3>Por tipo</h3>${Object.keys(TH).map(k=>{const l=data[k];return `<div class="bar"><span style="min-width:120px">${TH[k].n}</span><em>${l.length} itens · média ${l.length?Math.round(l.reduce((a,x)=>a+x.s,0)/l.length):"-"}</em></div>`}).join("")}</div></div><div class="note">Aba somente para visualização. Para editar, abra a aba do tipo.</div>`}
+else{const ca=c.map((_,i)=>L.reduce((a,x)=>a+x.v[i],0)/L.length),mx=ca.indexOf(Math.max(...ca)),mn=ca.indexOf(Math.min(...ca));
+h+=`<div class="two">${bars}<div><h3>Média por critério</h3>${radar(c,ca)}</div></div><div class="note">Melhor critério: <b>${c[mx]}</b> (${ca[mx].toFixed(1)}) · mais exigente: <b>${c[mn]}</b> (${ca[mn].toFixed(1)}) · total em todos os temas: ${tot} itens.</div>`}
+el.innerHTML=h}
+function tabs(){$("tabs").innerHTML="";const LB={todos:"🗂️ Todos",duelo:"⚔️ Duelo",fama:"🌟 Hall da fama",vergonha:"💀 Hall da vergonha"};for(const k of ["todos",...Object.keys(TH),"duelo","fama","vergonha"]){const b=document.createElement("button");b.textContent=LB[k]||TH[k].n;b.className=k==cur?"on":"";b.onclick=()=>{cur=k;edit=null;const d=$("del");if(d)d.remove();if(TH[k])reset();render()};$("tabs").append(b)}}
+function setImg(v){img=v;const p=$("pv");p.style.backgroundImage=v?`url(${v})`:"";p.textContent=v?"":"sem imagem";$("rmimg").hidden=!v}
+function load(f){if(!TH[cur]||!f||!f.type.startsWith("image/"))return;const u=URL.createObjectURL(f),i=new Image();i.onload=()=>{const m=260,k=Math.min(1,m/Math.max(i.width,i.height)),c=document.createElement("canvas");c.width=Math.round(i.width*k);c.height=Math.round(i.height*k);c.getContext("2d").drawImage(i,0,0,c.width,c.height);setImg(c.toDataURL("image/jpeg",.78));URL.revokeObjectURL(u)};i.src=u}
+$("pick").onclick=()=>$("file").click();$("file").onchange=e=>{load(e.target.files[0]);e.target.value=""};$("rmimg").onclick=()=>setImg(null);
+document.addEventListener("paste",e=>{for(const it of e.clipboardData.items)if(it.type.startsWith("image/")){load(it.getAsFile());break}});
+function reset(){setImg(null);vals=TH[cur].c.map(()=>5);$("name").value="";edit=null;$("ft").textContent="Novo item";$("save").textContent="Adicionar";form()}
+function form(){const box=$("crits");box.innerHTML="";TH[cur].c.forEach((c,i)=>{const d=document.createElement("div");d.className="crit";d.innerHTML=`<label>${c}${TH[cur].w[i]!=1?` <small style="color:var(--mu)">×${TH[cur].w[i]}</small>`:""}</label><input type="range" min="1" max="10" value="${vals[i]}"><b>${vals[i]}</b>`;const r=d.querySelector("input"),b=d.querySelector("b");r.oninput=()=>{vals[i]=+r.value;b.textContent=r.value;prev()};box.append(d)});prev()}
+function sim(){const el=$("sim"),n=TH[cur].c.length;
+const L=data[cur].filter(x=>x.id!=edit).map(x=>{let d=0;x.v.forEach((a,i)=>d+=(a-vals[i])**2);return{...x,p:Math.round((1-Math.sqrt(d/(n*81)))*100)}}).sort((a,b)=>b.p-a.p).slice(0,4);
+if(!L.length){el.innerHTML="";return}
+el.innerHTML='<h3>🔗 Itens parecidos</h3><div class="note">Com perfil de notas semelhante ao que está no formulário. Clique para abrir.</div><div class="sim"></div>';
+const box=el.querySelector(".sim");
+L.forEach(x=>{const t=tier(x.s),d=document.createElement("div");d.className="sc2";
+d.innerHTML=`<div class="th" style="background-color:${t[2]};${x.img?`background-image:url(${x.img})`:""}">${x.img?"":t[0]}</div><div>${esc(x.n)}<small>${x.p}% parecido · nota ${x.s} (${t[0]})</small></div>`;
+d.onclick=()=>pick(x.id);box.append(d)})}
+function prev(){const s=score(vals),t=tier(s);$("rs").textContent=s;$("rb").textContent=t[0];$("rb").style.background=t[2];$("radar").innerHTML=radar(TH[cur].c,vals);sim()}
+function hall(){const f=cur=="fama",b=$("board"),ks=Object.keys(TH),md=f?["🥇","🥈","🥉","4º","5º"]:["💀","👎","😬","4º","5º"];
+$("formcard").hidden=true;$("stats").hidden=true;b.className="";
+const all=ks.flatMap(k=>data[k].map(x=>({...x,k}))),srt=a=>[...a].sort((x,y)=>f?cmp(x,y):cmp(y,x));
+let h=`<div class="card"><h2>${f?"🌟 Hall da fama":"💀 Hall da vergonha"}</h2><div class="note" style="margin:0">${f?"Os maiores sucessos de cada tipo: as 5 maiores notas.":"Os maiores fracassos de cada tipo: as 5 menores notas."}</div>`;
+if(all.length){const e=srt(all)[0];h+=`<p style="margin:12px 0 0">${f?"👑 Maior nota de todas":"🗑️ Pior nota de todas"}: <b>${esc(e.n)}</b> (${TH[e.k].n}) com <b>${e.s}</b>/100</p>`}
+h+="</div>";
+ks.forEach(k=>{const c=TH[k].c,L=srt(data[k]).slice(0,5);h+=`<div class="card"><h2>${TH[k].n}</h2>`;
+if(!L.length)h+='<div class="empty">Nenhum item avaliado ainda.</div>';
+L.forEach((x,i)=>{const t=tier(x.s),ix=x.v.indexOf(f?Math.max(...x.v):Math.min(...x.v));
+h+=`<div class="hr"><div class="md">${md[i]}</div><div class="th" style="background-color:${t[2]};${x.img?`background-image:url(${x.img})`:""}">${x.img?"":t[0]}</div><div class="nm">${esc(x.n)}<small>${f?"Ponto forte":"Ponto fraco"}: ${c[ix]} (${x.v[ix]}/10)</small></div><div class="pt">${x.s}</div></div>`});
+h+="</div>"});
+b.innerHTML=h}
+function render(){tabs();if(cur=="duelo"){duel();return}if(cur=="fama"||cur=="vergonha"){hall();return}$("stats").hidden=false;const all=cur=="todos",b=$("board");b.innerHTML="";b.className=all?"todos":"";$("formcard").hidden=all;const list=all?Object.keys(TH).flatMap(k=>data[k].map(x=>({...x,k}))):data[cur];
+ T.forEach(t=>{const its=list.filter(x=>tier(x.s)[0]==t[0]).sort(cmp);
+  const row=document.createElement("div");row.className="tier";
+  row.innerHTML=`<div class="tl" style="background:${t[2]}">${t[0]}<small>${t[0]=="E"?"0-29":t[1]+"+"}</small></div><div class="items"></div>`;
+  const box=row.querySelector(".items");
+  if(!its.length)box.innerHTML='<div class="empty">vazio</div>';
+  its.forEach(x=>{const e=document.createElement("div");const nm=(all?TH[x.k].n.split(" ")[0]+" ":"")+esc(x.n);if(x.img){e.className="it im";e.innerHTML=`<div class="ph" style="background-image:url(${x.img})"></div><span class="sc">${x.s}</span><div class="cap">${nm}</div>`}else{e.className="it";e.innerHTML=`${nm}<span>${x.s}</span>`}if(!all)e.onclick=()=>pick(x.id);e.title=`Duelos: ${DU.w[x.id]||0}V · ${DU.l[x.id]||0}D`;box.append(e)});
+  b.append(row)});stats()}
+function pick(id){const x=data[cur].find(i=>i.id==id);edit=id;$("name").value=x.n;vals=[...x.v];setImg(x.img||null);$("ft").textContent="Editando: "+x.n;$("save").textContent="Salvar";form();
+ if(!$("del")){const d=document.createElement("button");d.id="del";d.className="btn g";d.textContent="Excluir";d.onclick=()=>{data[cur]=data[cur].filter(i=>i.id!=edit);save();d.remove();reset();render()};document.querySelector(".res").append(d)}
+ window.scrollTo({top:0,behavior:"smooth"})}
+$("save").onclick=()=>{const n=$("name").value.trim();if(!n){$("name").focus();return}
+ const o={id:edit||Date.now(),n,v:[...vals],s:score(vals),img};
+ if(edit)data[cur]=data[cur].map(i=>i.id==edit?o:i);else data[cur].push(o);
+ save();const d=$("del");if(d)d.remove();reset();render()};
+$("clr").onclick=()=>{const d=$("del");if(d)d.remove();reset()};
+reset();render();
+</script>
+</body>
+</html>
