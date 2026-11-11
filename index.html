@@ -69,6 +69,10 @@ input[type=text]{width:100%;padding:10px;border:1px solid var(--bd);border-radiu
 .vsb{align-self:center;font-weight:800;color:var(--mu)}
 .empty{color:var(--mu);font-size:.85rem;padding:8px}
 .note{color:var(--mu);font-size:.8rem;margin-top:8px}
+.transfer-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.transfer-actions .btn{display:inline-flex;align-items:center;justify-content:center}
+#transfer-status:empty{display:none}
+
 @media(max-width:520px){.duelc .th{height:130px}.crit{grid-template-columns:100px 1fr 24px}.tl{width:56px}}
 </style>
 </head>
@@ -76,6 +80,16 @@ input[type=text]{width:100%;padding:10px;border:1px solid var(--bd);border-radiu
 <main>
 <h1>🏆 Tier List Maker</h1>
 <div class="tabs" id="tabs"></div>
+<div class="card" id="transfercard">
+  <h2>📦 Transferir suas tier lists</h2>
+  <div class="transfer-actions">
+    <button class="btn" type="button" id="export-tier">📤 Exportar arquivo</button>
+    <button class="btn g" type="button" id="import-tier">📥 Importar arquivo</button>
+    <input type="file" id="import-file" accept=".json,application/json" hidden>
+  </div>
+  <div class="note">Salve um arquivo .json com todas as categorias, imagens, notas e duelos. Envie-o para outro dispositivo ou navegador e importe por lá. A importação substitui os dados existentes no navegador de destino, mediante confirmação.</div>
+  <div class="note" id="transfer-status" role="status" aria-live="polite"></div>
+</div>
 <div class="card" id="formcard">
   <h2 id="ft">Novo item</h2>
   <input type="text" id="name" placeholder="Nome">
@@ -195,6 +209,80 @@ $("save").onclick=()=>{const n=$("name").value.trim();if(!n){$("name").focus();r
  if(edit)data[cur]=data[cur].map(i=>i.id==edit?o:i);else data[cur].push(o);
  save();const d=$("del");if(d)d.remove();reset();render()};
 $("clr").onclick=()=>{const d=$("del");if(d)d.remove();reset()};
+
+// Backup portátil: inclui as imagens (em data URLs) e o histórico dos duelos.
+const transferStatus=msg=>{$("transfer-status").textContent=msg};
+$("export-tier").onclick=()=>{
+ try{
+  const backup={format:"tier-list-maker",version:1,exportedAt:new Date().toISOString(),data,duels:DU};
+  const blob=new Blob([JSON.stringify(backup,null,2)],{type:"application/json;charset=utf-8"});
+  const url=URL.createObjectURL(blob),a=document.createElement("a");
+  a.href=url;a.download="tier-list-backup-"+new Date().toISOString().slice(0,10)+".json";
+  document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+  transferStatus("Backup gerado: "+Object.values(data).reduce((s,l)=>s+l.length,0)+" itens, incluindo imagens e duelos. Guarde o arquivo para importá-lo em outro navegador.");
+ }catch(e){transferStatus("Não foi possível gerar o arquivo de exportação.")}
+};
+$("import-tier").onclick=()=>$('import-file').click();
+
+function validateBackup(backup){
+ if(!backup||backup.format!=="tier-list-maker"||backup.version!==1||!backup.data||typeof backup.data!=="object")
+  throw new Error("Formato inválido ou versão de backup não suportada.");
+ const clean={};let count=0;
+ for(const k of Object.keys(TH)){
+  const list=backup.data[k];
+  if(!Array.isArray(list))throw new Error("O arquivo não contém uma categoria válida: "+k+".");
+  clean[k]=list.map(item=>{
+   if(!item||typeof item!=="object"||!(typeof item.id==="string"||typeof item.id==="number")||
+      !/^[A-Za-z0-9_-]{1,80}$/.test(String(item.id))||typeof item.n!=="string"||!item.n.trim()||
+      !Array.isArray(item.v)||item.v.length!==TH[k].c.length||
+      !item.v.every(v=>Number.isInteger(v)&&v>=1&&v<=10)||
+      !(item.img==null||(typeof item.img==="string"&&/^data:image\/(?:jpeg|png|webp|gif);base64,[A-Za-z0-9+/=]+$/i.test(item.img))))
+    throw new Error("O arquivo contém um item inválido na categoria "+k+".");
+   const v=[...item.v];
+   return{id:item.id,n:item.n.trim(),v,s:score(v,k),img:item.img||null};
+  });
+  count+=clean[k].length;
+ }
+ const duels={w:Object.create(null),l:Object.create(null),p:Object.create(null)};
+ const src=backup.duels||{};
+ for(const field of ["w","l","p"]){
+  const obj=src[field]||{};
+  if(typeof obj!=="object"||Array.isArray(obj))throw new Error("Histórico de duelos inválido.");
+  for(const [key,value] of Object.entries(obj)){
+   if(!/^[A-Za-z0-9_-]{1,180}$/.test(key)||!Number.isSafeInteger(value)||value<0)
+    throw new Error("Há um resultado de duelo inválido no arquivo.");
+   duels[field][key]=value;
+  }
+ }
+ return{data:clean,duels,count};
+}
+$("import-file").onchange=async e=>{
+ const file=e.target.files[0];e.target.value="";
+ if(!file)return;
+ try{
+  if(file.size>30*1024*1024)throw new Error("O arquivo é grande demais (limite de 30 MB).");
+  const candidate=validateBackup(JSON.parse(await file.text()));
+  const before=Object.values(data).reduce((a,l)=>a+l.length,0);
+  const msg="Importar "+candidate.count+" itens de “"+file.name+"”?\n\n"+
+   "Isso substituirá as "+before+" avaliações e todos os duelos atualmente salvos neste navegador.\n\n"+
+   "Recomendação: exporte um backup atual antes de substituir. Deseja continuar?";
+  if(!window.confirm(msg)){transferStatus("Importação cancelada. Seus dados atuais não foram alterados.");return}
+  // Só aplica na tela depois de ambas as gravações concluírem; restaura em caso de falha.
+  const oldData=localStorage.getItem("tierdata"),oldDuels=localStorage.getItem("tierduel");
+  try{
+   localStorage.setItem("tierdata",JSON.stringify(candidate.data));
+   localStorage.setItem("tierduel",JSON.stringify(candidate.duels));
+  }catch(err){
+   try{if(oldData===null)localStorage.removeItem("tierdata");else localStorage.setItem("tierdata",oldData);
+       if(oldDuels===null)localStorage.removeItem("tierduel");else localStorage.setItem("tierduel",oldDuels)}catch(_){/* armazenamento indisponível */}
+   throw new Error("Não foi possível salvar o backup neste navegador. Verifique o armazenamento disponível.");
+  }
+  data=candidate.data;DU=candidate.duels;cur="todos";dt="filmes";pair=null;edit=null;
+  const del=$("del");if(del)del.remove();
+  render();
+  transferStatus("Importação concluída: "+candidate.count+" itens restaurados, com imagens, avaliações e duelos.");
+ }catch(err){transferStatus("Erro ao importar: "+(err instanceof SyntaxError?"o arquivo não é um JSON válido.":err.message))}
+};
 reset();render();
 </script>
 </body>
